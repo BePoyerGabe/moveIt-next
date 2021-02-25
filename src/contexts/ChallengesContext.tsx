@@ -1,11 +1,21 @@
+import { randomBytes } from 'crypto'
 import { createContext, useState, ReactNode } from 'react'
+import challenges from '../../challenges.json'
+
+interface Challenge {
+    type: 'body' | 'eye',
+    description: string,
+    amount: number
+}
 
 interface ChallengesProviderData {
     level: number, 
     currentExp: number, 
-    challengesCompleted: number, 
+    challengesCompleted: number,
+    activeChallenge: Challenge,
     levelUp: () => void, 
-    startNewChallenge: () => void
+    startNewChallenge: () => void,
+    resetChallenge: () => void
 }
 
 interface ChallengesProviderProps {
@@ -19,19 +29,28 @@ export const ChallengesContext = createContext({} as ChallengesProviderData)
 //           toda a aplicação, todos terão acesso
 export function ChallengesProvider( { children }: ChallengesProviderProps) {
     const [level, setLevel] = useState(1)
-    const [currentExp, setcurrentExp] = useState(0)
-    const [challengesCompleted, setchallengesCompleted] = useState(0)
+    const [currentExp, setCurrentExp] = useState(0)
+    const [challengesCompleted, setChallengesCompleted] = useState(0)
+
+    const [activeChallenge, setActiveChallenge] = useState(null)
 
     function levelUp() {
         setLevel( level + 1 )
     }
 
     function startNewChallenge() {
-        console.log('New challenge')
+        const randomChallengeIndex = Math.floor(Math.random() * challenges.length)
+        const challenge = challenges[randomChallengeIndex]
+
+        setActiveChallenge(challenge)
+    }
+
+    function resetChallenge() {
+        setActiveChallenge(null)
     }
     
     return (
-        <ChallengesContext.Provider value={{ level, currentExp, challengesCompleted, levelUp, startNewChallenge }}>
+        <ChallengesContext.Provider value={{ level, activeChallenge,currentExp, challengesCompleted, levelUp, startNewChallenge,  resetChallenge }}>
             { children }
         </ChallengesContext.Provider>
     );
