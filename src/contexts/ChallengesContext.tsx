@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto'
+import  Cookies from 'js-cookie'
 import { createContext, useState, ReactNode, useEffect } from 'react'
 import challenges from '../../challenges.json'
 
@@ -21,7 +21,10 @@ interface ChallengesProviderData {
 }
 
 interface ChallengesProviderProps {
-    children: ReactNode
+  children: ReactNode,
+  level: number,
+  currentExp: number,
+  challengesCompleted: number
 }
 
 export const ChallengesContext = createContext({} as ChallengesProviderData)
@@ -29,10 +32,11 @@ export const ChallengesContext = createContext({} as ChallengesProviderData)
 
 //Provider - todos os componentes dentro desse contexto terão acesso aos dados e como _app engloba
 //           toda a aplicação, todos terão acesso
-export function ChallengesProvider( { children }: ChallengesProviderProps) {
-    const [level, setLevel] = useState(1)
-    const [currentExp, setCurrentExp] = useState(0)
-    const [challengesCompleted, setChallengesCompleted] = useState(0)
+export function ChallengesProvider( { children, ...rest}: ChallengesProviderProps) {
+
+    const [level, setLevel] = useState(rest.level ?? 1)
+    const [currentExp, setCurrentExp] = useState(rest.currentExp ?? 0)
+    const [challengesCompleted, setChallengesCompleted] = useState(rest.challengesCompleted ?? 0)
 
     const [activeChallenge, setActiveChallenge] = useState(null)
 
@@ -42,6 +46,13 @@ export function ChallengesProvider( { children }: ChallengesProviderProps) {
     useEffect(() => {
         Notification.requestPermission()
     }, [])
+
+    useEffect(() => {
+        Cookies.set('level', String(level))
+        Cookies.set('currentExp', String(currentExp))
+        Cookies.set('challengesCompleted', String(challengesCompleted))
+    }, [level, currentExp, challengesCompleted])
+
 
     function levelUp() {
         setLevel( level + 1 )
